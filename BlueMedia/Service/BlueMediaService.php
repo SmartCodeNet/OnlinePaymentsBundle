@@ -69,7 +69,7 @@ class BlueMediaService
         string $description = null,
         int $gatewayId = null,
         string $currency = null
-    ): void {
+    ): string {
         $transactionMessage = new TransactionMessage(
             Amount::fromNative($amount),
             $this->connector->getServiceId(),
@@ -87,7 +87,7 @@ class BlueMediaService
             )
         );
 
-        $mode->serve($this->connector, $this->hashFactory, $transactionMessage);
+        return $mode->serve($this->connector, $this->hashFactory, $transactionMessage);
     }
 
     public function makeTransactionRefund(

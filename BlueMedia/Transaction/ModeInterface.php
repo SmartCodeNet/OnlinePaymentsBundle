@@ -12,5 +12,5 @@ interface ModeInterface
         ConnectorInterface $connector,
         HashFactoryInterface $hashFactory,
         OutMessageInterface $message
-    );
+    ): string;
 }
