@@ -1,0 +1,5 @@
+services:
+  GG\OnlinePaymentsBundle\PaymentsFactory:
+    public: true
+
+  GG\OnlinePaymentsBundle\Connector\ConnectorInterface: '@GG\OnlinePaymentsBundle\Connector\BlueMediaConnector'
