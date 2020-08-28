@@ -65,9 +65,10 @@ class TransactionMessage extends MessageAbstract implements OutMessageInterface
         StringValue $description = null,
         IntegerNumber $gatewayID = null,
         Currency $currency = null,
-        Email $customerEmail = null
+        Email $customerEmail = null,
+        OrderId $orderId = null
     ) {
-        $this->orderId = OrderId::fromNative();
+        $this->orderId = $orderId;
         $this->amount = $amount;
         $this->serviceId = $serviceId;
         $this->description = $description;

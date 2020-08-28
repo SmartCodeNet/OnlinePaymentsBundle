@@ -14,6 +14,7 @@ use GG\OnlinePaymentsBundle\BlueMedia\Message\TransactionRefundMessage;
 use GG\OnlinePaymentsBundle\BlueMedia\Transport\Transport;
 use GG\OnlinePaymentsBundle\BlueMedia\Transport\Xml;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\CustomerData;
+use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\OrderId;
 use GG\OnlinePaymentsBundle\Connector\BlueMediaConnector;
 use GG\OnlinePaymentsBundle\Connector\ConnectorInterface;
 use GG\OnlinePaymentsBundle\BlueMedia\Exception\InvalidHashException;
@@ -68,7 +69,8 @@ class BlueMediaService
         string $customerEmail = null,
         string $description = null,
         int $gatewayId = null,
-        string $currency = null
+        string $currency = null,
+        string $orderId = null
     ): string {
         $transactionMessage = new TransactionMessage(
             Amount::fromNative($amount),
@@ -76,7 +78,8 @@ class BlueMediaService
             $description === null ? null : StringValue::fromNative($description),
             $gatewayId === null ? null : IntegerNumber::fromNative($gatewayId),
             $currency === null ? null : Currency::fromNative($currency),
-            $customerEmail === null ? null : Email::fromNative($customerEmail)
+            $customerEmail === null ? null : Email::fromNative($customerEmail),
+            $orderId === null ? null : OrderId::fromNative($orderId)
         );
 
         $eventDispatcher = new EventDispatcher();
