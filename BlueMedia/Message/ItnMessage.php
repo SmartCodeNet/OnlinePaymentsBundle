@@ -160,7 +160,8 @@ class ItnMessage extends MessageAbstract
             }
             $array[$propertyName] = $property->toNative();
         }
-        $array['customerData'] = StaticHydrator::extract(ValueObject::class, $this->customerData);
+        //zakomentowane - nie potrzebujemy danych platnika
+//        $array['customerData'] = StaticHydrator::extract(ValueObject::class, $this->customerData);
         return $array;
     }
 }

@@ -24,7 +24,7 @@ use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\Currency;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\Email;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\IntegerNumber;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\StringValue;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class BlueMediaService
 {
@@ -43,9 +43,15 @@ class BlueMediaService
      */
     private $connector;
 
-    public function __construct(ConnectorInterface $connector)
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    public function __construct(ConnectorInterface $connector, EventDispatcherInterface $eventDispatcher)
     {
         $this->connector = $connector;
+        $this->eventDispatcher = $eventDispatcher;
         self::$transport = null;
     }
 
@@ -82,8 +88,7 @@ class BlueMediaService
             $orderId === null ? null : OrderId::fromNative($orderId)
         );
 
-        $eventDispatcher = new EventDispatcher();
-        $eventDispatcher->dispatch(
+        $this->eventDispatcher->dispatch(
             new BlueMediaTransactionEvent(
                 $transactionMessage->getOrderId(),
                 $transactionMessage
@@ -108,8 +113,7 @@ class BlueMediaService
             $currency === null ? null : Currency::fromNative($currency)
         );
 
-        $eventDispatcher = new EventDispatcher();
-        $eventDispatcher->dispatch(
+        $this->eventDispatcher->dispatch(
             new BlueMediaTransactionRefundEvent(
                 $transactionRefundMessage->getRemoteId(),
                 $transactionRefundMessage
@@ -125,13 +129,13 @@ class BlueMediaService
 
         // TODO zaimplementować fabrykę do budowania wiadomości bazujących na otrzymanych danych
 
-        if (isset($transaction['customerData']) && is_array($transaction['customerData'])) {
-            $transaction['customerData'] = StaticHydrator::build(
-                ValueObject::class,
-                CustomerData::class,
-                $transaction['customerData']
-            );
-        }
+//        if (isset($transaction['customerData']) && is_array($transaction['customerData'])) {
+//            $transaction['customerData'] = StaticHydrator::build(
+//                ValueObject::class,
+//                CustomerData::class,
+//                $transaction['customerData']
+//            );
+//        }
 
         $transaction = StaticHydrator::build(ValueObject::class, ItnMessage::class, $transaction);
 
@@ -141,9 +145,8 @@ class BlueMediaService
             throw new InvalidHashException($transaction);
         }
 
-        $eventDispatcher = new EventDispatcher();
-        $eventDispatcher->dispatch(new BlueMediaMessageReceivedEvent($transaction));
-
+        $this->eventDispatcher->dispatch(new BlueMediaMessageReceivedEvent($transaction));
+dump('omg');
         return $transaction;
     }
 }
