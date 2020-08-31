@@ -8,6 +8,7 @@ use GG\OnlinePaymentsBundle\BlueMedia\Hash\HashFactoryInterface;
 use GG\OnlinePaymentsBundle\BlueMedia\Hydrator\StaticHydrator;
 use GG\OnlinePaymentsBundle\BlueMedia\Hydrator\ValueObject;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\CustomerData;
+use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\DateTime;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\OrderId;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\PaymentStatus;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\Amount;
@@ -50,7 +51,7 @@ class ItnMessage extends MessageAbstract
     private $paymentStatus;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      */
     private $paymentDate;
 
@@ -87,7 +88,7 @@ class ItnMessage extends MessageAbstract
     /**
      * @var Hash
      */
-    private $docHash;
+    public $docHash;
 
     public function __construct(
         IntegerNumber $serviceID = null,

@@ -15,7 +15,6 @@ class Xml implements Transport
         return $array;
 
 
-        // TODO ten fragment dotyczy tylko jednej wiadomości. nalezy to stad wyseparować, bo to uniwersalna klasa.
         $array = $array['Body']['Transaction'];
         $array['currency'] = $array['amount']['currency'];
         $array['amount'] = $array['amount']['value'];
