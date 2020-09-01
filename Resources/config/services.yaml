@@ -1,5 +1,7 @@
 services:
   GG\OnlinePaymentsBundle\PaymentsFactory:
+    arguments:
+      - '@event_dispatcher'
     public: true
 
   GG\OnlinePaymentsBundle\Connector\ConnectorInterface: '@GG\OnlinePaymentsBundle\Connector\BlueMediaConnector'

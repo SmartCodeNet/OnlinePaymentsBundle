@@ -13,7 +13,6 @@ use GG\OnlinePaymentsBundle\BlueMedia\Message\TransactionMessage;
 use GG\OnlinePaymentsBundle\BlueMedia\Message\TransactionRefundMessage;
 use GG\OnlinePaymentsBundle\BlueMedia\Transport\Transport;
 use GG\OnlinePaymentsBundle\BlueMedia\Transport\Xml;
-use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\CustomerData;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\OrderId;
 use GG\OnlinePaymentsBundle\Connector\BlueMediaConnector;
 use GG\OnlinePaymentsBundle\Connector\ConnectorInterface;
@@ -146,7 +145,7 @@ class BlueMediaService
         }
 
         $this->eventDispatcher->dispatch(new BlueMediaMessageReceivedEvent($transaction));
-dump('omg');
+
         return $transaction;
     }
 }

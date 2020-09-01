@@ -12,18 +12,27 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class PaymentsFactory
 {
-    public static function buildBlueMediaService(
+    /** @var EventDispatcherInterface  */
+    private $eventDispatcher;
+
+    public function __construct(
+        EventDispatcherInterface $eventDispatcher
+    ) {
+       $this->eventDispatcher = $eventDispatcher;
+    }
+
+
+    public function buildBlueMediaService(
         string $serviceUrl,
         string $serviceId,
-        string $secret,
-        EventDispatcherInterface $eventDispatcher
+        string $secret
     ): BlueMediaService {
         $connector = new BlueMediaConnector(
             Url::fromNative($serviceUrl),
             IntegerNumber::fromNative($serviceId),
             StringValue::fromNative($secret)
         );
-        $bmService = new BlueMediaService($connector, $eventDispatcher);
+        $bmService = new BlueMediaService($connector, $this->eventDispatcher);
         $bmService->setHashFactory(new HashFactory(
             $connector->getSecret()
         ));
