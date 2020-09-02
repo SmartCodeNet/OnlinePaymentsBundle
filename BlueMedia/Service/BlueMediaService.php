@@ -13,6 +13,7 @@ use GG\OnlinePaymentsBundle\BlueMedia\Message\TransactionMessage;
 use GG\OnlinePaymentsBundle\BlueMedia\Message\TransactionRefundMessage;
 use GG\OnlinePaymentsBundle\BlueMedia\Transport\Transport;
 use GG\OnlinePaymentsBundle\BlueMedia\Transport\Xml;
+use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\CustomerData;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\OrderId;
 use GG\OnlinePaymentsBundle\Connector\BlueMediaConnector;
 use GG\OnlinePaymentsBundle\Connector\ConnectorInterface;
@@ -126,19 +127,16 @@ class BlueMediaService
     {
         $transaction = self::getTransport()->decode($document);
 
-        // TODO zaimplementować fabrykę do budowania wiadomości bazujących na otrzymanych danych
-
-//        if (isset($transaction['customerData']) && is_array($transaction['customerData'])) {
-//            $transaction['customerData'] = StaticHydrator::build(
-//                ValueObject::class,
-//                CustomerData::class,
-//                $transaction['customerData']
-//            );
-//        }
+        if (isset($transaction['customerData']) && is_array($transaction['customerData'])) {
+            $transaction['customerData'] = StaticHydrator::build(
+                ValueObject::class,
+                CustomerData::class,
+                $transaction['customerData']
+            );
+        }
 
         $transaction = StaticHydrator::build(ValueObject::class, ItnMessage::class, $transaction);
 
-        // TODO odseparować logikę obsługującą odebranie wiadomości do oddzielnego serwisu, aby można to było ponownie wykorzystać
         $hash = $transaction->computeHash($this->hashFactory);
         if ((string)$hash !== (string)$transaction->docHash) {
             throw new InvalidHashException($transaction);

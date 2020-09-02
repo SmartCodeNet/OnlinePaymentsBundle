@@ -75,10 +75,10 @@ class ItnMessage extends MessageAbstract
      */
     private $title = null;
 
-//    /**
-//     * @var CustomerData|null
-//     */
-//    private $customerData = null;
+    /**
+     * @var CustomerData|null
+     */
+    private $customerData = null;
 
     /**
      * @var Amount
@@ -102,7 +102,7 @@ class ItnMessage extends MessageAbstract
         IntegerNumber $gatewayID = null,
         StringValue $addressIP = null,
         StringValue $title = null,
-//        CustomerData $customerData = null,
+        CustomerData $customerData = null,
         Hash $docHash,
         Amount $startAmount = null
     ) {
@@ -117,7 +117,7 @@ class ItnMessage extends MessageAbstract
         $this->gatewayID = $gatewayID;
         $this->addressIP = $addressIP;
         $this->title = $title;
-//        $this->customerData = $customerData;
+        $this->customerData = $customerData;
         $this->docHash = $docHash;
         $this->startAmount = $startAmount;
     }
@@ -135,9 +135,10 @@ class ItnMessage extends MessageAbstract
             }
             $args[$key] = $value;
         }
-//        if ($this->customerData !== null) {
-//            $args['customerData'] = $this->customerData->toNative();
-//        }
+
+        if ($this->customerData !== null) {
+            $args['customerData'] = $this->customerData->toNative();
+        }
 
         $args['paymentDate'] = preg_replace('/[\s\-\:]+/', '', $args['paymentDate']->toNative());
 
@@ -160,8 +161,8 @@ class ItnMessage extends MessageAbstract
             }
             $array[$propertyName] = $property->toNative();
         }
-        //zakomentowane - nie potrzebujemy danych platnika
-//        $array['customerData'] = StaticHydrator::extract(ValueObject::class, $this->customerData);
+
+        $array['customerData'] = StaticHydrator::extract(ValueObject::class, $this->customerData);
         return $array;
     }
 }

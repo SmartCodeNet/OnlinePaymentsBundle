@@ -12,8 +12,10 @@ class Xml implements Transport
 
         $array['serviceID'] = (string)$xml->serviceID;
         $array['docHash'] = (string)$xml->hash;
+        if (isset($array['customerData'])) {
+            $array['customerData'] = (array)$array['customerData'];
+        }
         return $array;
-
 
         $array = $array['Body']['Transaction'];
         $array['currency'] = $array['amount']['currency'];

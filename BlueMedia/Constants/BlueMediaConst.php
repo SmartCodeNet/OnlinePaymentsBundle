@@ -27,4 +27,5 @@ class BlueMediaConst
     public const INT_PAYMENT_DATE = 'paymentDate';
     public const INT_PAYMENT_STATUS = 'paymentStatus';
     public const INT_PAYMENT_STATUS_DETAILS = 'paymentStatusDetails';
+    public const INT_CUSTOMER_DATA = 'customerData';
 }

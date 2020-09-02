@@ -70,6 +70,7 @@ class ValueObject implements HydratorInterface
                 $paramName = $param->getName();
                 $notRequired = $param->isDefaultValueAvailable() && $param->getDefaultValue() === null;
                 $supplyParam = $data[$paramName] ?? null;
+
                 if (is_array($supplyParam)) {
                     $supplyParam = array_values($supplyParam);
                     $supplyParam = reset($supplyParam);
@@ -77,6 +78,7 @@ class ValueObject implements HydratorInterface
                 if ($supplyParam !== null) {
                     $declClass = $param->getClass();
                     $paramType = ($declClass === null ? null : (string)$declClass->getName());
+
                     if (null === $paramType || (is_object($supplyParam) && get_class($supplyParam) === $paramType)) {
                         $invokeParams[] = $supplyParam;
                         continue;
