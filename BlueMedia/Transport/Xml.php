@@ -4,7 +4,7 @@ namespace GG\OnlinePaymentsBundle\BlueMedia\Transport;
 
 class Xml implements Transport
 {
-    public function decode($content)
+    public function decode($content): array
     {
         $xml = simplexml_load_string($content, "SimpleXMLElement", LIBXML_NOCDATA);
 
@@ -16,34 +16,24 @@ class Xml implements Transport
             $array['customerData'] = (array)$array['customerData'];
         }
         return $array;
-
-        $array = $array['Body']['Transaction'];
-        $array['currency'] = $array['amount']['currency'];
-        $array['amount'] = $array['amount']['value'];
-        return $array;
     }
 
-    public function encode(array $array)
+    public function encode(array $array): string
     {
-        $array = $array['Confirmation'];
-        $arr = [
-            'serviceID' => $array['serviceID'],
-            'transactionsConfirmations' => [
-                'transactionConfirmed' => [
-                    'orderID' => $array['orderID'],
-                    'confirmation' => $array['confirmation']
-                ]
-            ],
-            'hash' => $array['docHash']
-        ];
+        $xml = new \XMLWriter();
+        $xml->openMemory();
+        $xml->startDocument('1.0', 'UTF-8');
+        $xml->startElement('confirmationList');
+        $xml->writeElement('serviceID', $array['ServiceID']);
+        $xml->startElement('transactionsConfirmations');
+        $xml->startElement('transactionConfirmed');
+        $xml->writeElement('orderID', $array['OrderID']);
+        $xml->writeElement('confirmation', $array['confirmation']);
+        $xml->endElement();
+        $xml->endElement();
+        $xml->writeElement('hash', $array['Hash']);
+        $xml->endElement();
 
-//        $soapArray = [
-//            '@attributes' => [
-//                'xmlns:env' => 'http://schemas.xmlsoap.org/soap/envelope/'
-//            ],
-//            'env:Header' => [],
-//            'env:Body' => $array
-//        ];
-        return ;
+        return $xml->outputMemory();
     }
 }

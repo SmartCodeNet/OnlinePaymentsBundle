@@ -16,7 +16,10 @@ class BlueMediaConst
     public const VALIDITY_TIME = 'ValidityTime';
     public const LINK_VALIDITY_TIME = 'LinkValidityTime';
     public const HASH = 'Hash';
+    public const CUSTOMER_DATA = 'customerData';
     public const CONFIRMATION = 'confirmation';
+    public const PAYMENT_DATE = 'paymentDate';
+    public const DOC_HASH = 'docHash';
 
     public const INT_SERVICE_ID = 'serviceID';
     public const INT_REMOTE_ID = 'remoteID';

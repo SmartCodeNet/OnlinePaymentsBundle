@@ -2,6 +2,7 @@
 
 namespace GG\OnlinePaymentsBundle\BlueMedia\Message;
 
+use GG\OnlinePaymentsBundle\BlueMedia\Constants\BlueMediaConst;
 use GG\OnlinePaymentsBundle\BlueMedia\Hash\ArgsTransport\ArgumentsTransportInterface;
 use GG\OnlinePaymentsBundle\BlueMedia\Hash\ArgsTransport\ItnArguments;
 use GG\OnlinePaymentsBundle\BlueMedia\Hash\HashFactoryInterface;
@@ -127,7 +128,7 @@ class ItnMessage extends MessageAbstract
         $args = new ItnArguments();
 
         $properties = get_object_vars($this);
-        unset($properties['docHash'], $properties['customerData']);
+        unset($properties[BlueMediaConst::DOC_HASH], $properties[BlueMediaConst::CUSTOMER_DATA]);
 
         foreach ($properties as $key => $value) {
             if (null === $value || (!is_object($value) && !$value instanceof ValueObjectInterface)) {
@@ -137,10 +138,14 @@ class ItnMessage extends MessageAbstract
         }
 
         if ($this->customerData !== null) {
-            $args['customerData'] = $this->customerData->toNative();
+            $args[BlueMediaConst::CUSTOMER_DATA] = $this->customerData->toNative();
         }
 
-        $args['paymentDate'] = preg_replace('/[\s\-\:]+/', '', $args['paymentDate']->toNative());
+        $args[BlueMediaConst::PAYMENT_DATE] = preg_replace(
+            '/[\s\-\:]+/',
+            '',
+            $args[BlueMediaConst::PAYMENT_DATE]->toNative()
+        );
 
         return $args;
     }
@@ -153,7 +158,7 @@ class ItnMessage extends MessageAbstract
     public function toArray(): array
     {
         $properties = get_object_vars($this);
-        unset($properties['docHash'], $properties['customerData']);
+        unset($properties[BlueMediaConst::DOC_HASH], $properties[BlueMediaConst::CUSTOMER_DATA]);
         $array = [];
         foreach ($properties as $propertyName => $property) {
             if (!is_object($property) && !$property instanceof ValueObjectInterface) {
@@ -162,7 +167,77 @@ class ItnMessage extends MessageAbstract
             $array[$propertyName] = $property->toNative();
         }
 
-        $array['customerData'] = StaticHydrator::extract(ValueObject::class, $this->customerData);
+        $array[BlueMediaConst::CUSTOMER_DATA] = StaticHydrator::extract(ValueObject::class, $this->customerData);
         return $array;
+    }
+
+    public function getServiceID(): IntegerNumber
+    {
+        return $this->serviceID;
+    }
+
+    public function getOrderID(): OrderId
+    {
+        return $this->orderID;
+    }
+
+    public function getRemoteID(): StringValue
+    {
+        return $this->remoteID;
+    }
+
+    public function getAmount(): Amount
+    {
+        return $this->amount;
+    }
+
+    public function getCurrency(): Currency
+    {
+        return $this->currency;
+    }
+
+    public function getPaymentStatus(): PaymentStatus
+    {
+        return $this->paymentStatus;
+    }
+
+    public function getPaymentDate(): DateTime
+    {
+        return $this->paymentDate;
+    }
+
+    public function getPaymentStatusDetails(): StringValue
+    {
+        return $this->paymentStatusDetails;
+    }
+
+    public function getGatewayID(): ?IntegerNumber
+    {
+        return $this->gatewayID;
+    }
+
+    public function getAddressIP(): ?StringValue
+    {
+        return $this->addressIP;
+    }
+
+    public function getTitle(): ?StringValue
+    {
+        return $this->title;
+    }
+
+    public function getCustomerData(): ?CustomerData
+    {
+        return $this->customerData;
+    }
+
+    public function getStartAmount(): Amount
+    {
+        return $this->startAmount;
+    }
+
+    public function getDocHash(): Hash
+    {
+        return $this->docHash;
     }
 }

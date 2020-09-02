@@ -43,9 +43,9 @@ class ItnArguments extends ArgumentsTransportAbstract
     {
         $result = $this->args;
 
-        if (isset($result['customerData'])) {
-            $resultCustomerData = $result['customerData'];
-            unset($result['customerData']);
+        if (isset($result[BlueMediaConst::CUSTOMER_DATA])) {
+            $resultCustomerData = $result[BlueMediaConst::CUSTOMER_DATA];
+            unset($result[BlueMediaConst::CUSTOMER_DATA]);
             $this->orderByKey($resultCustomerData, self::$customerData);
 
             foreach ($resultCustomerData as $cKey => $data) {

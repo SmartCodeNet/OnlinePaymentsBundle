@@ -2,6 +2,8 @@
 
 namespace GG\OnlinePaymentsBundle\BlueMedia\Service;
 
+use GG\OnlinePaymentsBundle\BlueMedia\Constants\BlueMediaConst;
+use GG\OnlinePaymentsBundle\BlueMedia\Constants\BlueMediaITNMessageConst;
 use GG\OnlinePaymentsBundle\BlueMedia\Event\BlueMediaMessageReceivedEvent;
 use GG\OnlinePaymentsBundle\BlueMedia\Event\BlueMediaTransactionEvent;
 use GG\OnlinePaymentsBundle\BlueMedia\Event\BlueMediaTransactionRefundEvent;
@@ -9,6 +11,7 @@ use GG\OnlinePaymentsBundle\BlueMedia\Hash\HashFactoryInterface;
 use GG\OnlinePaymentsBundle\BlueMedia\Hydrator\StaticHydrator;
 use GG\OnlinePaymentsBundle\BlueMedia\Hydrator\ValueObject;
 use GG\OnlinePaymentsBundle\BlueMedia\Message\ItnMessage;
+use GG\OnlinePaymentsBundle\BlueMedia\Message\ItnResponseMessage;
 use GG\OnlinePaymentsBundle\BlueMedia\Message\TransactionMessage;
 use GG\OnlinePaymentsBundle\BlueMedia\Message\TransactionRefundMessage;
 use GG\OnlinePaymentsBundle\BlueMedia\Transport\Transport;
@@ -123,15 +126,15 @@ class BlueMediaService
         $mode->serve($this->connector, $this->hashFactory, $transactionRefundMessage);
     }
 
-    public function receiveItnResult($document)
+    public function receiveItnResult($document): ?ItnMessage
     {
         $transaction = self::getTransport()->decode($document);
 
-        if (isset($transaction['customerData']) && is_array($transaction['customerData'])) {
-            $transaction['customerData'] = StaticHydrator::build(
+        if (isset($transaction[BlueMediaConst::CUSTOMER_DATA]) && is_array($transaction[BlueMediaConst::CUSTOMER_DATA])) {
+            $transaction[BlueMediaConst::CUSTOMER_DATA] = StaticHydrator::build(
                 ValueObject::class,
                 CustomerData::class,
-                $transaction['customerData']
+                $transaction[BlueMediaConst::CUSTOMER_DATA]
             );
         }
 
@@ -145,5 +148,30 @@ class BlueMediaService
         $this->eventDispatcher->dispatch(new BlueMediaMessageReceivedEvent($transaction));
 
         return $transaction;
+    }
+
+    public function makeItnXmlResult(
+        string $orderId,
+        string $confirmation = BlueMediaITNMessageConst::CONFIRMED
+    ): string {
+        $responseMessage = new ItnResponseMessage(
+            $this->connector->getServiceId(),
+            OrderId::fromNative($orderId),
+            StringValue::fromNative($confirmation)
+        );
+
+        $argsArray = $responseMessage->getArrayToExecute();
+
+        $argsArray = array_map(
+            static function ($value) {
+                return (string)$value;
+            },
+            $argsArray
+        );
+
+        $argsArray[BlueMediaConst::HASH] = (string)$responseMessage->computeHash($this->hashFactory);
+
+        return self::getTransport()->encode($argsArray);
+
     }
 }
