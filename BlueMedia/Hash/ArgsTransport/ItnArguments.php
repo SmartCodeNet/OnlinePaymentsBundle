@@ -31,7 +31,11 @@ class ItnArguments extends ArgumentsTransportAbstract
             BlueMediaConst::INT_PAYMENT_DATE,
             BlueMediaConst::INT_PAYMENT_STATUS,
             BlueMediaConst::INT_PAYMENT_STATUS_DETAILS,
-            BlueMediaConst::INT_CUSTOMER_DATA
+            BlueMediaConst::INT_ADDRESS_IP,
+            BlueMediaConst::INT_CUSTOMER_NUMBER,
+            BlueMediaConst::INT_TITLE,
+            BlueMediaConst::INT_CUSTOMER_DATA,
+            BlueMediaConst::INT_VERIFICATION_STATUS
         ];
     }
 
