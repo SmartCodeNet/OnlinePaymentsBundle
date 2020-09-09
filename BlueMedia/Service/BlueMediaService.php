@@ -66,6 +66,16 @@ class BlueMediaService
         return self::$transport;
     }
 
+    public static function getPaymentUrl(): string
+    {
+        return '/payment';
+    }
+
+    public static function getTransactionRefundUrl(): string
+    {
+        return '/transactionRefund';
+    }
+
     public function setHashFactory(HashFactoryInterface $hashFactory): self
     {
         $this->hashFactory = $hashFactory;
@@ -107,7 +117,7 @@ class BlueMediaService
         string $remoteId,
         float $amount = null,
         string $currency = null
-    ): string {
+    ): \SimpleXMLElement {
         $transactionRefundMessage = new TransactionRefundMessage(
             $this->connector->getServiceId(),
             StringValue::fromNative($messageId),
@@ -123,7 +133,7 @@ class BlueMediaService
             )
         );
 
-        return $mode->serve($this->connector, $this->hashFactory, $transactionRefundMessage);
+        return simplexml_load_string($mode->serve($this->connector, $this->hashFactory, $transactionRefundMessage));
     }
 
     public function receiveItnResult($document): ?ItnMessage
@@ -172,6 +182,5 @@ class BlueMediaService
         $argsArray[BlueMediaConst::HASH] = (string)$responseMessage->computeHash($this->hashFactory);
 
         return self::getTransport()->encode($argsArray);
-
     }
 }
