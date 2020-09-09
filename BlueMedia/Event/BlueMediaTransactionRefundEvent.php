@@ -3,7 +3,7 @@
 namespace GG\OnlinePaymentsBundle\BlueMedia\Event;
 
 use GG\OnlinePaymentsBundle\BlueMedia\Message\OutMessageInterface;
-use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\IntegerNumber;
+use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\StringValue;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class BlueMediaTransactionRefundEvent extends EventDispatcher
@@ -11,11 +11,11 @@ class BlueMediaTransactionRefundEvent extends EventDispatcher
     /** @var OutMessageInterface|null  */
     protected $message;
 
-    /** @var IntegerNumber  */
+    /** @var StringValue  */
     protected $remoteId;
 
     public function __construct(
-        IntegerNumber $remoteId,
+        StringValue $remoteId,
         OutMessageInterface $outMessage = null
     ) {
         parent::__construct();
@@ -28,7 +28,7 @@ class BlueMediaTransactionRefundEvent extends EventDispatcher
         return $this->message;
     }
 
-    public function getRemoteId(): IntegerNumber
+    public function getRemoteId(): StringValue
     {
         return $this->remoteId;
     }

@@ -8,6 +8,7 @@ class BlueMediaConst
     public const ORDER_ID = 'OrderID';
     public const MESSAGE_ID = 'MessageID';
     public const REMOTE_ID = 'RemoteID';
+    public const TRANS_REMOTE_ID = 'TransRemoteID';
     public const AMOUNT = 'Amount';
     public const DESCRIPTION = 'Description';
     public const GATEWAY_ID = 'GatewayID';

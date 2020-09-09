@@ -4,7 +4,7 @@ namespace GG\OnlinePaymentsBundle\BlueMedia\Message;
 
 use GG\OnlinePaymentsBundle\BlueMedia\Constants\BlueMediaConst;
 use GG\OnlinePaymentsBundle\BlueMedia\Hash\ArgsTransport\ArgumentsTransportInterface;
-use GG\OnlinePaymentsBundle\BlueMedia\Hash\ArgsTransport\TransactionArguments;
+use GG\OnlinePaymentsBundle\BlueMedia\Hash\ArgsTransport\TransactionRefundArguments;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\Amount;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\Currency;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\IntegerNumber;
@@ -41,14 +41,14 @@ class TransactionRefundMessage extends MessageAbstract implements OutMessageInte
         'amount' => BlueMediaConst::AMOUNT,
         'serviceId' => BlueMediaConst::SERVICE_ID,
         'messageId' => BlueMediaConst::MESSAGE_ID,
-        'remoteID' => BlueMediaConst::REMOTE_ID,
+        'remoteId' => BlueMediaConst::REMOTE_ID,
         'currency' => BlueMediaConst::CURRENCY,
     ];
 
     public function __construct(
         IntegerNumber $serviceId,
         StringValue $messageId,
-        IntegerNumber $remoteId,
+        StringValue $remoteId,
         Amount $amount = null,
         Currency $currency = null
     ) {
@@ -61,7 +61,7 @@ class TransactionRefundMessage extends MessageAbstract implements OutMessageInte
 
     protected function getArgsToComputeHash(): ArgumentsTransportInterface
     {
-        $args = new TransactionArguments();
+        $args = new TransactionRefundArguments();
 
         foreach ($this->mappedFieldsToExecute as $fieldLocal => $fieldExternal) {
             if ($this->{$fieldLocal} === null) {
@@ -75,7 +75,7 @@ class TransactionRefundMessage extends MessageAbstract implements OutMessageInte
 
     public function getArrayToExecute(): array
     {
-        $args = new TransactionArguments();
+        $args = new TransactionRefundArguments();
 
         foreach ($this->mappedFieldsToExecute as $fieldLocal => $fieldExternal) {
             if ($this->{$fieldLocal} === null) {
@@ -87,7 +87,7 @@ class TransactionRefundMessage extends MessageAbstract implements OutMessageInte
         return $args->toArray();
     }
 
-    public function getRemoteId(): IntegerNumber
+    public function getRemoteId(): StringValue
     {
         return $this->remoteId;
     }

@@ -107,11 +107,11 @@ class BlueMediaService
         string $remoteId,
         float $amount = null,
         string $currency = null
-    ): void {
+    ): string {
         $transactionRefundMessage = new TransactionRefundMessage(
             $this->connector->getServiceId(),
             StringValue::fromNative($messageId),
-            IntegerNumber::fromNative($remoteId),
+            StringValue::fromNative($remoteId),
             $amount === null ? null : Amount::fromNative($amount),
             $currency === null ? null : Currency::fromNative($currency)
         );
@@ -123,7 +123,7 @@ class BlueMediaService
             )
         );
 
-        $mode->serve($this->connector, $this->hashFactory, $transactionRefundMessage);
+        return $mode->serve($this->connector, $this->hashFactory, $transactionRefundMessage);
     }
 
     public function receiveItnResult($document): ?ItnMessage
