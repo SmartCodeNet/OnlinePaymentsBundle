@@ -38,10 +38,10 @@ class TransactionRefundMessage extends MessageAbstract implements OutMessageInte
     private $currency;
 
     private $mappedFieldsToExecute = [
-        'amount' => BlueMediaConst::AMOUNT,
         'serviceId' => BlueMediaConst::SERVICE_ID,
         'messageId' => BlueMediaConst::MESSAGE_ID,
         'remoteId' => BlueMediaConst::REMOTE_ID,
+        'amount' => BlueMediaConst::AMOUNT,
         'currency' => BlueMediaConst::CURRENCY,
     ];
 

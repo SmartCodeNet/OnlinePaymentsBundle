@@ -2,6 +2,8 @@
 
 namespace GG\OnlinePaymentsBundle\BlueMedia\Transport;
 
+use GG\OnlinePaymentsBundle\BlueMedia\Response\Data\ResponseDataBag;
+
 class Xml implements Transport
 {
     public function decode($content): array
@@ -16,6 +18,13 @@ class Xml implements Transport
             $array['customerData'] = (array)$array['customerData'];
         }
         return $array;
+    }
+
+    public function decodeTransactionBalancePayoff($content): array
+    {
+        $xml = simplexml_load_string($content, "SimpleXMLElement", LIBXML_NOCDATA);
+
+        return (array)$xml;
     }
 
     public function encode(array $array): string
@@ -35,5 +44,12 @@ class Xml implements Transport
         $xml->endElement();
 
         return $xml->outputMemory();
+    }
+
+    public function decodeToBag(string $content): ResponseDataBag
+    {
+        $xml = simplexml_load_string($content, "SimpleXMLElement", LIBXML_NOCDATA);
+
+        return ResponseDataBag::instance((array)$xml);
     }
 }

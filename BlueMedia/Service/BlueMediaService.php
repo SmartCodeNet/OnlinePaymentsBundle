@@ -4,6 +4,7 @@ namespace GG\OnlinePaymentsBundle\BlueMedia\Service;
 
 use GG\OnlinePaymentsBundle\BlueMedia\Constants\BlueMediaConst;
 use GG\OnlinePaymentsBundle\BlueMedia\Constants\BlueMediaITNMessageConst;
+use GG\OnlinePaymentsBundle\BlueMedia\Event\BlueMediaBalancePayoffEvent;
 use GG\OnlinePaymentsBundle\BlueMedia\Event\BlueMediaMessageReceivedEvent;
 use GG\OnlinePaymentsBundle\BlueMedia\Event\BlueMediaTransactionEvent;
 use GG\OnlinePaymentsBundle\BlueMedia\Event\BlueMediaTransactionRefundEvent;
@@ -13,7 +14,10 @@ use GG\OnlinePaymentsBundle\BlueMedia\Hydrator\ValueObject;
 use GG\OnlinePaymentsBundle\BlueMedia\Message\ItnMessage;
 use GG\OnlinePaymentsBundle\BlueMedia\Message\ItnResponseMessage;
 use GG\OnlinePaymentsBundle\BlueMedia\Message\TransactionMessage;
+use GG\OnlinePaymentsBundle\BlueMedia\Message\TransactionPayoffMessage;
+use GG\OnlinePaymentsBundle\BlueMedia\Message\TransactionPayoffResponseMessage;
 use GG\OnlinePaymentsBundle\BlueMedia\Message\TransactionRefundMessage;
+use GG\OnlinePaymentsBundle\BlueMedia\Message\TransactionRefundResponseMessage;
 use GG\OnlinePaymentsBundle\BlueMedia\Transport\Transport;
 use GG\OnlinePaymentsBundle\BlueMedia\Transport\Xml;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\CustomerData;
@@ -76,12 +80,27 @@ class BlueMediaService
         return '/transactionRefund';
     }
 
+    public static function getTransactionBalancePayoffUrl(): string
+    {
+        return '/balancePayoff';
+    }
+
     public function setHashFactory(HashFactoryInterface $hashFactory): self
     {
         $this->hashFactory = $hashFactory;
         return $this;
     }
 
+    /**
+     * @param ModeInterface $mode
+     * @param float $amount
+     * @param string|null $customerEmail
+     * @param string|null $description
+     * @param int|null $gatewayId
+     * @param string|null $currency
+     * @param string|null $orderId
+     * @return string
+     */
     public function makeTransaction(
         ModeInterface $mode,
         float $amount,
@@ -98,7 +117,7 @@ class BlueMediaService
             $gatewayId === null ? null : IntegerNumber::fromNative($gatewayId),
             $currency === null ? null : Currency::fromNative($currency),
             $customerEmail === null ? null : Email::fromNative($customerEmail),
-            $orderId === null ? null : OrderId::fromNative($orderId)
+            $orderId === null ? OrderId::fromNative() : OrderId::fromNative($orderId)
         );
 
         $this->eventDispatcher->dispatch(
@@ -111,13 +130,21 @@ class BlueMediaService
         return $mode->serve($this->connector, $this->hashFactory, $transactionMessage);
     }
 
+    /**
+     * @param ModeInterface $mode
+     * @param string $messageId
+     * @param string $remoteId
+     * @param float|null $amount
+     * @param string|null $currency
+     * @throws InvalidHashException
+     */
     public function makeTransactionRefund(
         ModeInterface $mode,
         string $messageId,
         string $remoteId,
         float $amount = null,
         string $currency = null
-    ): \SimpleXMLElement {
+    ): void {
         $transactionRefundMessage = new TransactionRefundMessage(
             $this->connector->getServiceId(),
             StringValue::fromNative($messageId),
@@ -126,16 +153,33 @@ class BlueMediaService
             $currency === null ? null : Currency::fromNative($currency)
         );
 
+        $response = $mode->serve($this->connector, $this->hashFactory, $transactionRefundMessage);
+
+        /** @var TransactionRefundResponseMessage $transaction */
+        $transaction = StaticHydrator::build(
+            ValueObject::class,
+            TransactionRefundResponseMessage::class,
+            self::getTransport()->decodeTransactionBalancePayoff($response)
+        );
+
+        if (!$transaction->isHashValid($this->hashFactory)) {
+            throw new InvalidHashException($transaction);
+        }
+
         $this->eventDispatcher->dispatch(
             new BlueMediaTransactionRefundEvent(
                 $transactionRefundMessage->getRemoteId(),
-                $transactionRefundMessage
+                $transactionRefundMessage,
+                self::getTransport()->decodeToBag($response)
             )
         );
-
-        return simplexml_load_string($mode->serve($this->connector, $this->hashFactory, $transactionRefundMessage));
     }
 
+    /**
+     * @param $document
+     * @return ItnMessage|null
+     * @throws InvalidHashException
+     */
     public function receiveItnResult($document): ?ItnMessage
     {
         $transaction = self::getTransport()->decode($document);
@@ -148,10 +192,10 @@ class BlueMediaService
             );
         }
 
+        /** @var ItnMessage $transaction */
         $transaction = StaticHydrator::build(ValueObject::class, ItnMessage::class, $transaction);
 
-        $hash = $transaction->computeHash($this->hashFactory);
-        if ((string)$hash !== (string)$transaction->docHash) {
+        if (!$transaction->isHashValid($this->hashFactory)) {
             throw new InvalidHashException($transaction);
         }
 
@@ -182,5 +226,73 @@ class BlueMediaService
         $argsArray[BlueMediaConst::HASH] = (string)$responseMessage->computeHash($this->hashFactory);
 
         return self::getTransport()->encode($argsArray);
+    }
+
+    /**
+     * @param ModeInterface $mode
+     * @param string $messageId
+     * @param float|null $amount
+     * @param int|null $balancePointId
+     * @param string|null $currency
+     * @param string|null $customerNRB
+     * @param string|null $swiftCode
+     * @param string|null $foreignTransferMode
+     * @param string|null $receiverName
+     * @param string|null $title
+     * @param string|null $remoteRefID
+     * @param string|null $invoiceNumber
+     * @param string|null $plenipotentiaryID
+     * @throws InvalidHashException
+     */
+    public function makeTransactionBalancePayoff(
+        ModeInterface $mode,
+        string $messageId,
+        float $amount = null,
+        int $balancePointId = null,
+        string $currency = null,
+        string $customerNRB = null,
+        string $swiftCode = null,
+        string $foreignTransferMode = null,
+        string $receiverName = null,
+        string $title = null,
+        string $remoteRefID = null,
+        string $invoiceNumber = null,
+        string $plenipotentiaryID = null
+    ): void {
+        $transactionRefundMessage = new TransactionPayoffMessage(
+            ($balancePointId !== null) ? null : $this->connector->getServiceId(),
+            StringValue::fromNative($messageId),
+            $amount === null ? null : Amount::fromNative($amount),
+            $balancePointId === null ? null : IntegerNumber::fromNative($amount),
+            $currency === null ? null : Currency::fromNative($currency),
+            $customerNRB === null ? null : StringValue::fromNative($customerNRB),
+            $swiftCode === null ? null : StringValue::fromNative($swiftCode),
+            $foreignTransferMode === null ? null : StringValue::fromNative($foreignTransferMode),
+            $receiverName === null ? null : StringValue::fromNative($receiverName),
+            $title === null ? null : StringValue::fromNative($title),
+            $remoteRefID === null ? null : StringValue::fromNative($remoteRefID),
+            $invoiceNumber === null ? null : StringValue::fromNative($invoiceNumber),
+            $plenipotentiaryID === null ? null : StringValue::fromNative($plenipotentiaryID)
+        );
+
+        $response = $mode->serve($this->connector, $this->hashFactory, $transactionRefundMessage);
+
+        /** @var TransactionPayoffResponseMessage $transaction */
+        $transaction = StaticHydrator::build(
+            ValueObject::class,
+            TransactionPayoffResponseMessage::class,
+            self::getTransport()->decodeTransactionBalancePayoff($response)
+        );
+
+        if (!$transaction->isHashValid($this->hashFactory)) {
+            throw new InvalidHashException($transaction);
+        }
+
+        $this->eventDispatcher->dispatch(
+            new BlueMediaBalancePayoffEvent(
+                $transactionRefundMessage,
+                self::getTransport()->decodeToBag($response)
+            )
+        );
     }
 }
