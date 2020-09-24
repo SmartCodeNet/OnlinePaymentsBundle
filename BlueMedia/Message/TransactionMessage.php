@@ -7,6 +7,7 @@ use GG\OnlinePaymentsBundle\BlueMedia\Hash\ArgsTransport\ArgumentsTransportInter
 use GG\OnlinePaymentsBundle\BlueMedia\Hash\ArgsTransport\TransactionArguments;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\Amount;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\Currency;
+use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\DateTime;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\Email;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\IntegerNumber;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\OrderId;
@@ -49,14 +50,26 @@ class TransactionMessage extends MessageAbstract implements OutMessageInterface
      */
     private $orderId;
 
+    /**
+     * @var StringValue|null
+     */
+    private $validityTime;
+
+    /**
+     * @var StringValue|null
+     */
+    private $linkValidityTime;
+
     private $mappedFieldsToExecute = [
-        'amount' => BlueMediaConst::AMOUNT,
         'serviceId' => BlueMediaConst::SERVICE_ID,
         'orderId' => BlueMediaConst::ORDER_ID,
-        'gatewayID' => BlueMediaConst::GATEWAY_ID,
+        'amount' => BlueMediaConst::AMOUNT,
         'description' => BlueMediaConst::DESCRIPTION,
+        'gatewayID' => BlueMediaConst::GATEWAY_ID,
         'currency' => BlueMediaConst::CURRENCY,
         'customerEmail' => BlueMediaConst::CUSTOMER_EMAIL,
+        'validityTime' => BlueMediaConst::VALIDITY_TIME,
+        'linkValidityTime' => BlueMediaConst::LINK_VALIDITY_TIME,
     ];
 
     public function __construct(
@@ -66,7 +79,9 @@ class TransactionMessage extends MessageAbstract implements OutMessageInterface
         IntegerNumber $gatewayID = null,
         Currency $currency = null,
         Email $customerEmail = null,
-        OrderId $orderId = null
+        OrderId $orderId = null,
+        DateTime $validityTime = null,
+        DateTime $linkValidityTime = null
     ) {
         $this->orderId = $orderId;
         $this->amount = $amount;
@@ -75,6 +90,8 @@ class TransactionMessage extends MessageAbstract implements OutMessageInterface
         $this->gatewayID = $gatewayID;
         $this->currency = $currency;
         $this->customerEmail = $customerEmail;
+        $this->validityTime = $validityTime;
+        $this->linkValidityTime = $linkValidityTime;
     }
 
     protected function getArgsToComputeHash(): ArgumentsTransportInterface
@@ -138,5 +155,15 @@ class TransactionMessage extends MessageAbstract implements OutMessageInterface
     public function getCustomerEmail(): ?Email
     {
         return $this->customerEmail;
+    }
+
+    public function getValidityTime(): ?StringValue
+    {
+        return $this->validityTime;
+    }
+
+    public function getLinkValidityTime(): ?StringValue
+    {
+        return $this->linkValidityTime;
     }
 }

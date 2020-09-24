@@ -21,6 +21,7 @@ use GG\OnlinePaymentsBundle\BlueMedia\Message\TransactionRefundResponseMessage;
 use GG\OnlinePaymentsBundle\BlueMedia\Transport\Transport;
 use GG\OnlinePaymentsBundle\BlueMedia\Transport\Xml;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\CustomerData;
+use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\DateTime;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\OrderId;
 use GG\OnlinePaymentsBundle\Connector\BlueMediaConnector;
 use GG\OnlinePaymentsBundle\Connector\ConnectorInterface;
@@ -99,6 +100,7 @@ class BlueMediaService
      * @param int|null $gatewayId
      * @param string|null $currency
      * @param string|null $orderId
+     * @param \DateTime|null $linkValidity
      * @return string
      */
     public function makeTransaction(
@@ -108,7 +110,8 @@ class BlueMediaService
         string $description = null,
         int $gatewayId = null,
         string $currency = null,
-        string $orderId = null
+        string $orderId = null,
+        \DateTime $linkValidity = null
     ): string {
         $transactionMessage = new TransactionMessage(
             Amount::fromNative($amount),
@@ -117,7 +120,9 @@ class BlueMediaService
             $gatewayId === null ? null : IntegerNumber::fromNative($gatewayId),
             $currency === null ? null : Currency::fromNative($currency),
             $customerEmail === null ? null : Email::fromNative($customerEmail),
-            $orderId === null ? OrderId::fromNative() : OrderId::fromNative($orderId)
+            $orderId === null ? OrderId::fromNative() : OrderId::fromNative($orderId),
+            $linkValidity === null ? null : DateTime::fromNative($linkValidity->format('Y-m-d H:i:s')),
+            $linkValidity === null ? null : DateTime::fromNative($linkValidity->format('Y-m-d H:i:s'))
         );
 
         $this->eventDispatcher->dispatch(
