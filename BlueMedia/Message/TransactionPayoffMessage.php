@@ -4,7 +4,7 @@ namespace GG\OnlinePaymentsBundle\BlueMedia\Message;
 
 use GG\OnlinePaymentsBundle\BlueMedia\Constants\BlueMediaConst;
 use GG\OnlinePaymentsBundle\BlueMedia\Hash\ArgsTransport\ArgumentsTransportInterface;
-use GG\OnlinePaymentsBundle\BlueMedia\Hash\ArgsTransport\TransactionRefundArguments;
+use GG\OnlinePaymentsBundle\BlueMedia\Hash\ArgsTransport\TransactionPayoffArguments;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\Amount;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\Currency;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\IntegerNumber;
@@ -125,7 +125,7 @@ class TransactionPayoffMessage extends MessageAbstract implements OutMessageInte
 
     protected function getArgsToComputeHash(): ArgumentsTransportInterface
     {
-        $args = new TransactionRefundArguments();
+        $args = new TransactionPayoffArguments();
 
         foreach ($this->mappedFieldsToExecute as $fieldLocal => $fieldExternal) {
             if ($this->{$fieldLocal} === null) {
@@ -139,7 +139,7 @@ class TransactionPayoffMessage extends MessageAbstract implements OutMessageInte
 
     public function getArrayToExecute(): array
     {
-        $args = new TransactionRefundArguments();
+        $args = new TransactionPayoffArguments();
 
         foreach ($this->mappedFieldsToExecute as $fieldLocal => $fieldExternal) {
             if ($this->{$fieldLocal} === null) {

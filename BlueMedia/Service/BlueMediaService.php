@@ -83,7 +83,7 @@ class BlueMediaService
 
     public static function getTransactionBalancePayoffUrl(): string
     {
-        return '/balancePayoff';
+        return '/webapi/balancePayoff';
     }
 
     public function setHashFactory(HashFactoryInterface $hashFactory): self
