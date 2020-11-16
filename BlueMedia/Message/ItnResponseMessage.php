@@ -5,7 +5,6 @@ namespace GG\OnlinePaymentsBundle\BlueMedia\Message;
 use GG\OnlinePaymentsBundle\BlueMedia\Constants\BlueMediaConst;
 use GG\OnlinePaymentsBundle\BlueMedia\Hash\ArgsTransport\ArgumentsTransportInterface;
 use GG\OnlinePaymentsBundle\BlueMedia\Hash\ArgsTransport\ResponseArguments;
-use GG\OnlinePaymentsBundle\BlueMedia\Hash\ArgsTransport\TransactionArguments;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\OrderId;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\IntegerNumber;
 use GG\OnlinePaymentsBundle\BlueMedia\ValueObject\StringValue;
@@ -45,7 +44,7 @@ class ItnResponseMessage extends MessageAbstract implements OutMessageInterface
 
     protected function getArgsToComputeHash(): ArgumentsTransportInterface
     {
-        $args = new TransactionArguments();
+        $args = new ResponseArguments();
 
         foreach ($this->mappedFieldsToExecute as $fieldLocal => $fieldExternal) {
             if ($this->{$fieldLocal} === null) {
