@@ -166,8 +166,9 @@ class ItnMessage extends MessageAbstract
             }
             $array[$propertyName] = $property->toNative();
         }
-
-        $array[BlueMediaConst::CUSTOMER_DATA] = StaticHydrator::extract(ValueObject::class, $this->customerData);
+        if ($this->customerData !== null) {
+            $array[BlueMediaConst::CUSTOMER_DATA] = StaticHydrator::extract(ValueObject::class, $this->customerData);
+        }
         return $array;
     }
 
